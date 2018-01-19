@@ -3,21 +3,53 @@
 <project name="single1" default="javadoc" basedir=".">
 	<description>Single Class Test</description>
 	
-	<property name="dir.report" location="result" />
+	<property name="dir.report" location="result/junit" />
 	<property name="dir.src" location="src" />
 	<property name="dir.build" location="build" />
 	<property name="dir.docs" location="docs" />
 	<property name="dir.lib" location="lib" />
 	<property name="prop.name" value="test" />
-	<property name="dir.findbugs" location="findbugs"/>
+	<property name="dir.findbugs" location="result/findbugs"/>
 	
 	<path id="classpath">
         <fileset dir="${dir.lib}" includes="**/*.jar"/>
     </path>
 	
+	<!--
 	<taskdef name="findbugs" classname="edu.umd.cs.findbugs.anttask.FindBugsTask" classpathref="classpath" />
 	
 	<target name="findbugs">
+	    <findbugs home="${dir.lib}"
+		      output="html"
+		      outputFile="${dir.findbugs}/bcel-fb.xml" 
+	    >
+	        <sourcePath path="${dir.src}" />
+	        <class location="${dir.build}/jar/" />
+	    </findbugs>
+	</target>
+	-->
+	
+	<target name="report.findbugs"
+		description="Run code analysis over code to check for problems."
+		>
+		<!-- Fail this target if FindBugs is not installed. -->
+		<available file="${dir.lib}/findbugs.jar"
+			property="findbugs.available" />
+		<fail unless="findbugs.available"
+			message="Error: FINDBUGS_HOME not set or findbugs.jar not found." />
+		<taskdef name="findbugs" classname="edu.umd.cs.findbugs.anttask.FindBugsTask"
+			classpath="${dir.lib}/findbugs-ant.jar" />
+			
+		<mkdir dir="${dir.findbugs}" />
+		
+		<findbugs home="${dir.lib}/" workHard="true"
+			output="html" outputFile="${dir.findbugs}/findbugs_report.html">
+			<class location="${dir.build}/jar/" />
+			<auxClasspath>
+				<fileset file="${dir.lib}/junit-4.12.jar" />
+			</auxClasspath>
+		</findbugs>
+		
 		<findbugs home="${dir.lib}"
 				  output="html"
 				  outputFile="${dir.findbugs}/bcel-fb.html" >
@@ -29,7 +61,8 @@
 	
 	<target name="init">
 		<mkdir dir="build/classes" />
-		<mkdir dir="result" />
+		<mkdir dir="${dir.report}" />
+		<mkdir dir="${dir.findbugs}" />
 		<echo>Apache Ant version is ${ant.version} - ${prop.name} </echo>
 	</target>
 	
@@ -84,7 +117,7 @@
 		<java jar="build/jar/ExMain.jar" fork="true" />    
 	</target>
 	
-	<target name="javadoc" depends="clean,init,compile,jar,run,junit,findbugs">        
+	<target name="javadoc" depends="clean,init,compile,jar,run,junit,report.findbugs">        
 		<javadoc            
 			sourcepath="${dir.src}"
 			packagenames = "com.anttest.*"
@@ -93,11 +126,12 @@
             version = "true"
             docencoding="UTF-8"
             Encoding="UTF-8"
+            classpathref="classpath"
         >
         	<doctitle><![CDATA[= Simple Ant Project =]]></doctitle>
         	
         	<bottom>
-		    	<![CDATA[Copyright © 2018. All Rights Reserved.]]>
+		    	<![CDATA[Copyright @ 2018. All Rights Reserved.]]>
 		    </bottom>
         </javadoc>
     </target>
