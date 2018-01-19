@@ -18,7 +18,7 @@ public class TestEmployeeDetails {
       employee.setMonthlySalary(510);
 	
       double appraisal = empBusinessLogic.calculateAppraisal(employee);
-      assertEquals(500, appraisal, 13131);
+      assertEquals(0, appraisal, 0.0);
    }
 
    // test to check yearly salary

@@ -51,7 +51,6 @@
 	
 		<test name="com.anttest.test.TestEmployeeDetails"
 			haltonfailure="no" todir="${dir.report}">
-			<formatter type="plain" />
 			<formatter type="xml" />
 		</test>
 	  </junit>
