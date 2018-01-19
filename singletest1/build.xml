@@ -1,0 +1,64 @@
+<?xml version="1.0"?>
+
+<project name="single1" default="javadoc" basedir=".">
+	<description>Single Class Test</description>
+	
+	<property name="dir.src" location="src" />
+	<property name="dir.build" location="build" />
+	<property name="dir.docs" location="docs" />
+	<property name="dir.lib" location="lib" />
+	
+	<target name="init">
+		<mkdir dir="build/classes" />
+	</target>
+	
+	<target name="clean">
+		<delete dir="docs" />
+		<delete dir="build" />
+	</target>
+	
+	<!-- includeantruntime : ant의 클래스 패스를 클래스패스에 포함시킨다 -->
+	<target name="compile"  description="compile the source">        
+        <javac destdir="${dir.build}/classes/"
+        	   includeantruntime="false"
+        	   encoding="UTF-8">   
+        	<src path = "${dir.src}"/>
+        </javac>
+    </target>
+	
+	<target name="jar" >        
+		<mkdir dir="build/jar" />        
+        <jar
+            destfile="${dir.build}/jar/ExMain.jar"             
+            basedir="${dir.build}/classes"            
+            includes="com/anttest/**" 
+        >
+	    	<manifest>
+	            <attribute name="Main-Class" value="com.anttest.main.ExMain" />            
+	        </manifest>
+        </jar>
+    </target>
+	
+	<!-- Jar File 실행 -->
+	<target name="run">        
+		<java jar="build/jar/ExMain.jar" fork="true" />    
+	</target>
+	
+	<target name="javadoc" depends="clean,init,compile,jar,run">        
+		<javadoc            
+			sourcepath="${dir.src}"
+			packagenames = "com.anttest.*"
+            windowtitle="Ant Multi API"            
+            destdir="${dir.docs}"
+            version = "true"
+            docencoding="UTF-8"
+            Encoding="UTF-8"
+        >
+        	<doctitle><![CDATA[= Simple Ant Project =]]></doctitle>
+        	
+        	<bottom>
+		    	<![CDATA[Copyright © 2018. All Rights Reserved.]]>
+		    </bottom>
+        </javadoc>
+    </target>
+</project>
