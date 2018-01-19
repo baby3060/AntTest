@@ -3,6 +3,7 @@
 <project name="single1" default="javadoc" basedir=".">
 	<description>Single Class Test</description>
 	
+	<property name="dir.report" location="result" />
 	<property name="dir.src" location="src" />
 	<property name="dir.build" location="build" />
 	<property name="dir.docs" location="docs" />
@@ -14,7 +15,7 @@
         <fileset dir="${dir.lib}" includes="**/*.jar"/>
     </path>
 	
-	<taskdef name="findbugs" classname="edu.umd.cs.findbugs.anttask.FindBugsTask" classpathref="classpath"/>
+	<taskdef name="findbugs" classname="edu.umd.cs.findbugs.anttask.FindBugsTask" classpathref="classpath" />
 	
 	<target name="findbugs">
 		<findbugs home="${dir.lib}"
@@ -28,19 +29,40 @@
 	
 	<target name="init">
 		<mkdir dir="build/classes" />
+		<mkdir dir="result" />
 		<echo>Apache Ant version is ${ant.version} - ${prop.name} </echo>
 	</target>
 	
 	<target name="clean">
 		<delete dir="docs" />
 		<delete dir="build" />
+		<delete dir="result" />
+	</target>
+	
+	<target name="junit">
+
+	    <junit printsummary="yes" haltonfailure="no">
+	
+		<!-- Project classpath, must include junit.jar -->
+		<classpath refid="classpath" />
+	
+		<!-- test class -->
+		<classpath location="${dir.build}/classes/" />
+	
+		<test name="com.anttest.test.TestEmployeeDetails"
+			haltonfailure="no" todir="${dir.report}">
+			<formatter type="plain" />
+			<formatter type="xml" />
+		</test>
+	  </junit>
 	</target>
 	
 	<!-- includeantruntime : ant의 클래스 패스를 클래스패스에 포함시킨다 -->
 	<target name="compile"  description="compile the source">        
         <javac destdir="${dir.build}/classes/"
         	   includeantruntime="false"
-        	   encoding="UTF-8">   
+        	   encoding="UTF-8"
+        	   classpathref="classpath">   
         	<src path = "${dir.src}"/>
         </javac>
     </target>
@@ -63,7 +85,7 @@
 		<java jar="build/jar/ExMain.jar" fork="true" />    
 	</target>
 	
-	<target name="javadoc" depends="clean,init,compile,jar,run,findbugs">        
+	<target name="javadoc" depends="clean,init,compile,jar,run,junit,findbugs">        
 		<javadoc            
 			sourcepath="${dir.src}"
 			packagenames = "com.anttest.*"

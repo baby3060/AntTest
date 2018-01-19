@@ -1,8 +1,10 @@
 package com.anttest.model;
 
 public class Employee implements ModelInterface{
+	
 	private String name;
 	private int age;
+	private double monthlySalary;
 	
 	// Default Constructor
 	public Employee() {}
@@ -47,8 +49,24 @@ public class Employee implements ModelInterface{
 		this.age = age;	
 	}
 	
+	/**
+   * @return the monthlySalary
+   */
+	
+   public double getMonthlySalary() {
+      return monthlySalary;
+   }
+	
+   /**
+   * @param monthlySalary the monthlySalary to set
+   */
+	
+   public void setMonthlySalary(double monthlySalary) {
+      this.monthlySalary = monthlySalary;
+   }
+	
 	public String toString() {
-		return "Name : " + this.name + ", Age : " + this.age;	
+		return "Name : " + this.name + ", Age : " + this.age + ", Msalary : " + monthlySalary ;	
 	}
 	
 }
