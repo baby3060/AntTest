@@ -8,6 +8,23 @@
 	<property name="dir.docs" location="docs" />
 	<property name="dir.lib" location="lib" />
 	<property name="prop.name" value="test" />
+	<property name="dir.findbugs" location="findbugs"/>
+	
+	<path id="classpath">
+        <fileset dir="${dir.lib}" includes="**/*.jar"/>
+    </path>
+	
+	<taskdef name="findbugs" classname="edu.umd.cs.findbugs.anttask.FindBugsTask" classpathref="classpath"/>
+	
+	<target name="findbugs">
+		<findbugs home="${dir.lib}"
+				  output="html"
+				  outputFile="${dir.findbugs}/bcel-fb.html" >
+        	<sourcePath path="${dir.src}" />
+        
+        	<class location="${dir.build}/jar/" />
+		</findbugs>
+	</target>
 	
 	<target name="init">
 		<mkdir dir="build/classes" />
@@ -46,7 +63,7 @@
 		<java jar="build/jar/ExMain.jar" fork="true" />    
 	</target>
 	
-	<target name="javadoc" depends="clean,init,compile,jar,run">        
+	<target name="javadoc" depends="clean,init,compile,jar,run,findbugs">        
 		<javadoc            
 			sourcepath="${dir.src}"
 			packagenames = "com.anttest.*"
