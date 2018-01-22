@@ -27,9 +27,11 @@
 			
 		<mkdir dir="${dir.findbugs}" />
 		
-		<findbugs home="${dir.lib}/" workHard="false"
-			output="html" outputFile="${dir.findbugs}/findbugs_report.html">
-			<auxClasspath refid="classpath" />
+		<findbugs home="${dir.lib}/" workHard="true"
+			output="html" outputFile="${dir.findbugs}/findbugs_report.html"
+			timestampNow="true" reportLevel="low" effort="min"
+			>
+			<auxclasspath refid="classpath" />
 			<sourcePath path="${dir.src}" />
 			<class location="${dir.build}/classes/" />
 		</findbugs>
