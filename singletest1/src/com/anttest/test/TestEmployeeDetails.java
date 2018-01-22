@@ -1,7 +1,7 @@
 package com.anttest.test;
 
 import org.junit.Test;
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import com.anttest.model.Employee;
 import com.anttest.business.EmpBusiness;

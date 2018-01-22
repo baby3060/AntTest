@@ -15,24 +15,9 @@
         <fileset dir="${dir.lib}" includes="**/*.jar"/>
     </path>
 	
-	<!--
-	<taskdef name="findbugs" classname="edu.umd.cs.findbugs.anttask.FindBugsTask" classpathref="classpath" />
-	
-	<target name="findbugs">
-	    <findbugs home="${dir.lib}"
-		      output="html"
-		      outputFile="${dir.findbugs}/bcel-fb.xml" 
-	    >
-	        <sourcePath path="${dir.src}" />
-	        <class location="${dir.build}/jar/" />
-	    </findbugs>
-	</target>
-	-->
-	
 	<target name="report.findbugs"
 		description="Run code analysis over code to check for problems."
 		>
-		<!-- Fail this target if FindBugs is not installed. -->
 		<available file="${dir.lib}/findbugs.jar"
 			property="findbugs.available" />
 		<fail unless="findbugs.available"
@@ -42,22 +27,14 @@
 			
 		<mkdir dir="${dir.findbugs}" />
 		
-		<findbugs home="${dir.lib}/" workHard="true"
+		<findbugs home="${dir.lib}/" workHard="false"
 			output="html" outputFile="${dir.findbugs}/findbugs_report.html">
-			<class location="${dir.build}/jar/" />
-			<auxClasspath>
-				<fileset file="${dir.lib}/junit-4.12.jar" />
-			</auxClasspath>
-		</findbugs>
-		
-		<findbugs home="${dir.lib}"
-				  output="html"
-				  outputFile="${dir.findbugs}/bcel-fb.html" >
-        	<sourcePath path="${dir.src}" />
-        
-        	<class location="${dir.build}/jar/" />
+			<auxClasspath refid="classpath" />
+			<sourcePath path="${dir.src}" />
+			<class location="${dir.build}/classes/" />
 		</findbugs>
 	</target>
+	
 	
 	<target name="init">
 		<mkdir dir="build/classes" />
