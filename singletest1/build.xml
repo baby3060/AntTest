@@ -10,20 +10,119 @@
 	<property name="dir.lib" location="lib" />
 	<property name="prop.name" value="test" />
 	<property name="dir.findbugs" location="result/findbugs"/>
+	<property name="maxHeap" value="-Xmx900m"/>
+	<property name="enabledExtraVisitors" value="+CheckExpectedWarnings,+InefficientMemberAccess,+EmptyZipFileEntry"/>
+	<condition property="javacExecutableDefined">
+        <isset property="javac.executable"/>
+    </condition>
+    <property name="java.executable" value="" />
 	
 	<path id="classpath">
         <fileset dir="${dir.lib}" includes="**/*.jar"/>
     </path>
 	
+	<target name="defineTasks"> 
+        <taskdef name="findbugs" classname="edu.umd.cs.findbugs.anttask.FindBugsTask" classpath="${dir.lib}/findbugs-ant.jar" /> 
+        <taskdef name="filterBugs" classname="edu.umd.cs.findbugs.anttask.FilterBugsTask" classpath="${dir.lib}/findbugs-ant.jar"/> 
+        <taskdef name="printBugs" classname="edu.umd.cs.findbugs.anttask.ConvertXmlToTextTask" classpath="${dir.lib}/findbugs-ant.jar"/> 
+    </target> 
+	
+	<target name="runEffort" depends="defineTasks">
+        <echo>Test expected warnings with *min* effort</echo>
+        <findbugs home="${dir.lib}/"  jvmargs="-ea ${maxHeap}"
+             jvm="${java.executable}"
+             output="xml:withMessages" timestampNow="true" reportLevel="low" effort="min"
+             chooseVisitors="${enabledExtraVisitors}" outputFile="${dir.findbugs}/minEffort.xml">
+            <auxclasspath refid="classpath" />
+			<sourcePath path="${dir.src}" />
+			<class location="${dir.build}/classes/" />
+        </findbugs>
+	
+        <filterBugs home="${dir.lib}/"
+             priority="1"
+             bugPattern="FB"
+             inputFile="${dir.findbugs}/minEffort.xml"
+             outputFile="${dir.findbugs}/unexpectedMin.xml">
+         </filterBugs>
+        <echo>Test expected warnings with *less* effort</echo>
+        <findbugs home="${dir.lib}/"  jvmargs="-ea ${maxHeap}"
+             jvm="${java.executable}"
+             output="xml:withMessages" timestampNow="true" reportLevel="low" effort="less"
+             chooseVisitors="${enabledExtraVisitors}" outputFile="${dir.findbugs}/lessEffort.xml">
+           <auxclasspath refid="classpath" />
+			<sourcePath path="${dir.src}" />
+			<class location="${dir.build}/classes/" />
+        </findbugs>
+        <filterBugs home="${dir.lib}/"
+             priority="1"
+             bugPattern="FB"
+             inputFile="${dir.findbugs}/lessEffort.xml"
+             outputFile="${dir.findbugs}/unexpectedLess.xml">
+         </filterBugs>
+        <echo>Test expected warnings with *more* effort</echo>
+        <findbugs home="${dir.lib}/"  jvmargs="-ea ${maxHeap}"
+             jvm="${java.executable}"
+             output="xml:withMessages" timestampNow="true" reportLevel="low" effort="more"
+             chooseVisitors="${enabledExtraVisitors}" outputFile="${dir.findbugs}/moreEffort.xml">
+            <auxclasspath refid="classpath" />
+			<sourcePath path="${dir.src}" />
+			<class location="${dir.build}/classes/" />
+        </findbugs>
+        
+        <filterBugs home="${dir.lib}/"
+             priority="1"
+             bugPattern="FB"
+             inputFile="${dir.findbugs}/moreEffort.xml"
+             outputFile="${dir.findbugs}/unexpectedMore.xml">
+         </filterBugs>
+         
+         <printBugs home="${dir.lib}/"
+             errorProperty="bugsReported"
+             inputFile="${dir.findbugs}/unexpectedMore.xml"
+             format="text">
+         </printBugs>
+
+        <echo>Test expected warnings with *max* effort</echo>
+        <findbugs home="${dir.lib}/"  jvmargs="-ea ${maxHeap}"
+             jvm="${java.executable}"
+             output="xml:withMessages" timestampNow="true" reportLevel="low" effort="max"
+             chooseVisitors="${enabledExtraVisitors}" outputFile="${dir.findbugs}/maxEffort.xml">
+            <auxclasspath refid="classpath" />
+			<sourcePath path="${dir.src}" />
+			<class location="${dir.build}/classes/" />
+        </findbugs>
+	
+        <filterBugs home="${dir.lib}/"
+             priority="1"
+             bugPattern="FB"
+             inputFile="${dir.findbugs}/maxEffort.xml"
+             outputFile="${dir.findbugs}/unexpectedMax.xml">
+         </filterBugs>
+
+         <printBugs home="${dir.lib}/"
+             errorProperty="bugsReported"
+             inputFile="${dir.findbugs}/unexpectedMax.xml"
+             format="text">
+         </printBugs>
+        <fail message="Unexpected bug warning(s) found, check the 'printBugs' output!">
+            <condition>
+                <isset property="bugsReported"/>
+            </condition>
+        </fail>
+    </target>
+	
+	<!--
 	<target name="report.findbugs"
 		description="Run code analysis over code to check for problems."
+		
 		>
 		<available file="${dir.lib}/findbugs.jar"
 			property="findbugs.available" />
 		<fail unless="findbugs.available"
 			message="Error: FINDBUGS_HOME not set or findbugs.jar not found." />
 		<taskdef name="findbugs" classname="edu.umd.cs.findbugs.anttask.FindBugsTask"
-			classpath="${dir.lib}/findbugs-ant.jar" />
+			classpath="${dir.lib}/findbugs-ant.jar"
+			 />
 			
 		<mkdir dir="${dir.findbugs}" />
 		
@@ -36,6 +135,7 @@
 			<class location="${dir.build}/classes/" />
 		</findbugs>
 	</target>
+	-->
 	
 	
 	<target name="init">
@@ -96,7 +196,7 @@
 		<java jar="build/jar/ExMain.jar" fork="true" />    
 	</target>
 	
-	<target name="javadoc" depends="clean,init,compile,jar,run,junit,report.findbugs">        
+	<target name="javadoc" depends="clean,init,compile,jar,run,junit,runEffort">        
 		<javadoc            
 			sourcepath="${dir.src}"
 			packagenames = "com.anttest.*"
