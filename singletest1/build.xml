@@ -4,10 +4,12 @@
 	<description>Single Class Test</description>
 	
 	<property name="dir.report" location="result/junit" />
+	<property name="dir.pmd" location="result/pmd" />
 	<property name="dir.src" location="src" />
 	<property name="dir.build" location="build" />
 	<property name="dir.docs" location="docs" />
 	<property name="dir.lib" location="lib" />
+	<property name="pmd.home" location="pmd_home" />
 	<property name="prop.name" value="test" />
 	<property name="dir.findbugs" location="result/findbugs"/>
 	<property name="maxHeap" value="-Xmx900m"/>
@@ -20,6 +22,11 @@
 	<path id="classpath">
         <fileset dir="${dir.lib}" includes="**/*.jar"/>
     </path>
+    
+    <path id="pmdpath">
+    	<pathelement location="${dir.build}"/>
+        <fileset dir="${pmd.home}" includes="**/*.jar"/>
+    </path>
 	
 	<target name="defineTasks"> 
         <taskdef name="findbugs" classname="edu.umd.cs.findbugs.anttask.FindBugsTask" classpath="${dir.lib}/findbugs-ant.jar" /> 
@@ -27,6 +34,22 @@
         <taskdef name="printBugs" classname="edu.umd.cs.findbugs.anttask.ConvertXmlToTextTask" classpath="${dir.lib}/findbugs-ant.jar"/> 
     </target> 
 	
+	<target name="pmd">
+		<taskdef name="pmd" classname="net.sourceforge.pmd.ant.PMDTask" classpathref="pmdpath"
+			 />
+		<pmd shortFilenames="true" 
+			encoding="UTF-8" 
+			rulesetfiles="rulesets/java/imports.xml,rulesets/java/design.xml">
+			<formatter type="net.sourceforge.pmd.renderers.HTMLRenderer" toFile="${dir.pmd}/pmd_report.html" toConsole="false">
+				<param name="linkPrefix" value="http://pmd.sourceforge.net/xref/"/>
+			</formatter>
+			<fileset dir="${dir.src}">
+				<include name="com/anttest/**/*.java"/>
+			</fileset>
+		</pmd>
+	</target>
+	
+	<!--
 	<target name="runEffort" depends="defineTasks">
         <echo>Test expected warnings with *min* effort</echo>
         <findbugs home="${dir.lib}/"  jvmargs="-ea ${maxHeap}"
@@ -110,8 +133,9 @@
             </condition>
         </fail>
     </target>
+	-->
 	
-	<!--
+	
 	<target name="report.findbugs"
 		description="Run code analysis over code to check for problems."
 		
@@ -135,13 +159,14 @@
 			<class location="${dir.build}/classes/" />
 		</findbugs>
 	</target>
-	-->
+	
 	
 	
 	<target name="init">
 		<mkdir dir="build/classes" />
 		<mkdir dir="${dir.report}" />
 		<mkdir dir="${dir.findbugs}" />
+		<mkdir dir="${dir.pmd}" />
 		<echo>Apache Ant version is ${ant.version} - ${prop.name} </echo>
 	</target>
 	
@@ -196,7 +221,7 @@
 		<java jar="build/jar/ExMain.jar" fork="true" />    
 	</target>
 	
-	<target name="javadoc" depends="clean,init,compile,jar,run,junit,runEffort">        
+	<target name="javadoc" depends="clean,init,compile,jar,run,junit,report.findbugs,pmd">        
 		<javadoc            
 			sourcepath="${dir.src}"
 			packagenames = "com.anttest.*"
