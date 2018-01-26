@@ -1,6 +1,8 @@
 <?xml version="1.0"?>
 
-<project name="single1" default="javadoc" basedir=".">
+<project name="single1" default="javadoc" basedir="."
+	xmlns:sonar="antlib:org.sonar.ant"
+	>
 	<description>Single Class Test</description>
 	
 	<property name="dir.report" location="result/junit" />
@@ -19,9 +21,28 @@
     </condition>
     <property name="java.executable" value="" />
 	
+	<property name="sonar.host.url" value="http://localhost:9000" />
+
+	<!-- Define the Sonar properties -->
+	<property name="sonar.projectKey" value="org.sonarqube:sonarqube-scanner-ant" />
+	<property name="sonar.projectName" value="Example of SonarQube Scanner for Ant Usage" />
+	<property name="sonar.projectVersion" value="1.0" />
+	<property name="sonar.language" value="java" />
+	<property name="sonar.sources" value="${dir.src}" />
+	<property name="sonar.java.binaries" value="${dir.build}/classes/" />
+	<property name="sonar.java.libraries" value="${dir.lib}/*.jar" />
+	<property name="sonar.sourceEncoding" value="UTF-8" />
+	
 	<path id="classpath">
         <fileset dir="${dir.lib}" includes="**/*.jar"/>
     </path>
+    
+    <target name="sonar">
+		<taskdef uri="antlib:org.sonar.ant" resource="org/sonar/ant/antlib.xml">
+			<classpath path="${dir.lib}/sonarqube-ant-task-2.5.jar" />
+		</taskdef>
+		<sonar:sonar />
+	</target>
     
     <path id="pmdpath">
     	<pathelement location="${dir.build}"/>
