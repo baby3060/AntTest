@@ -2,9 +2,19 @@
 
 <project name="single1" default="javadoc" basedir="."
 	xmlns:sonar="antlib:org.sonar.ant"
+	xmlns:ivy="antlib:org.apache.ivy.ant"
 	>
 	<description>Single Class Test</description>
 	
+	
+	<!-- Ftp Properties -->
+	<property name="ftp-server" value="192.168.10.241" />
+	<property name="ftp-userid" value="ftpuser" />
+	<property name="ftp-password" value="bncitR&amp;D" />
+	
+	<!-- Ftp Properties -->
+	
+	<!-- Java Run Properties -->
 	<property name="dir.report" location="result/junit" />
 	<property name="dir.pmd" location="result/pmd" />
 	<property name="dir.src" location="src" />
@@ -21,6 +31,9 @@
     </condition>
     <property name="java.executable" value="" />
 	
+	<!-- Java Run Properties -->
+	
+	<!-- Sonar Properties -->
 	<property name="sonar.host.url" value="http://localhost:9000" />
 
 	<!-- Define the Sonar properties -->
@@ -32,6 +45,15 @@
 	<property name="sonar.java.binaries" value="${dir.build}/classes/" />
 	<property name="sonar.java.libraries" value="${dir.lib}/*.jar" />
 	<property name="sonar.sourceEncoding" value="UTF-8" />
+	<!-- Sonar Properties -->
+	
+	<target name="ivy_report" depends="ivy_resolve">
+        <ivy:report todir="${dir.docs}"/>
+    </target>
+	
+	<target name="ivy_resolve">
+        <ivy:retrieve />
+    </target>
 	
 	<path id="classpath">
         <fileset dir="${dir.lib}" includes="**/*.jar"/>
@@ -182,7 +204,6 @@
 	</target>
 	
 	
-	
 	<target name="init">
 		<mkdir dir="build/classes" />
 		<mkdir dir="${dir.report}" />
@@ -242,7 +263,7 @@
 		<java jar="build/jar/ExMain.jar" fork="true" />    
 	</target>
 	
-	<target name="javadoc" depends="clean,init,compile,jar,run,junit,report.findbugs,pmd">        
+	<target name="javadoc" depends="clean,init,compile,jar,run,junit,report.findbugs,pmd,ivy_report">        
 		<javadoc            
 			sourcepath="${dir.src}"
 			packagenames = "com.anttest.*"
@@ -260,4 +281,29 @@
 		    </bottom>
         </javadoc>
     </target>
+    
+    <target name="ftp" description="upload file to server">
+    	<ftp 
+			server="${ftp-server}" remotedir="/TEST/"
+			userid="${ftp-userid}" password="${ftp-password}"
+			action="mkdir" verbose="yes">
+		</ftp>
+		<ftp 
+			server="${ftp-server}" remotedir="/TEST/"
+			userid="${ftp-userid}" password="${ftp-password}"
+			action="send" verbose="yes" depends="yes">
+			<!-- All -->
+			<!-- <fileset dir="" /> -->
+    		<!-- All -->
+    		
+    		<!-- PMD_HOME Folder 안에 있는 모든 내용 제외 다 올림 -->
+    		<fileset dir="">
+    			<exclude name="**/pmd_home/**" />	
+    		</fileset>
+    		<!-- PMD_HOME Folder 안에 있는 모든 내용 제외 다 올림 -->
+    		
+		</ftp>
+    	
+    </target>
+    
 </project>
